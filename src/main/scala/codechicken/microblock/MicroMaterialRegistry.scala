@@ -19,6 +19,8 @@ import scala.collection.JavaConversions._
 import java.util.{Iterator => JIterator}
 import net.minecraft.block.Block.SoundType
 
+import java.util.function.Supplier
+
 object MicroMaterialRegistry {
 
   /** Interface for defining a micro material
@@ -88,6 +90,18 @@ object MicroMaterialRegistry {
     def explosionResistance(entity: Entity): Float
   }
 
+  private class MMRThreadState {
+    var idMap: Array[(String, IMicroMaterial)] = _
+  }
+
+  private val threadState =
+    ThreadLocal.withInitial[MMRThreadState](new Supplier[MMRThreadState]() {
+      override def get(): MMRThreadState = new MMRThreadState()
+    })
+  def idMap = threadState.get().idMap
+  def idMap_=(idMap: Array[(String, IMicroMaterial)]) =
+    threadState.get().idMap = idMap
+
   /** Interface for overriding the default micro placement highlight handler to
     * show the effect of placement on a certain block/part
     */
@@ -107,7 +121,6 @@ object MicroMaterialRegistry {
 
   private val typeMap = HashMap[String, IMicroMaterial]()
   private val nameMap = HashMap[String, Int]()
-  private var idMap: Array[(String, IMicroMaterial)] = _
   private val idWriter = new IDWriter
 
   private val highlightRenderers = ListBuffer[IMicroHighlightRenderer]()

@@ -20,15 +20,15 @@ import cpw.mods.fml.common.registry.{GameRegistry, GameData}
 
 import java.util.function.Supplier
 
-private class ThreadState {
+private class BMMThreadState {
   var pass = 0
   var builder: CCRenderPipeline#PipelineBuilder = _
 }
 
 object MaterialRenderHelper {
   private val threadState =
-    ThreadLocal.withInitial[ThreadState](new Supplier[ThreadState]() {
-      override def get(): ThreadState = new ThreadState()
+    ThreadLocal.withInitial[BMMThreadState](new Supplier[BMMThreadState]() {
+      override def get(): BMMThreadState = new BMMThreadState()
     })
   def pass = threadState.get().pass
   def pass_=(pass: Int) = threadState.get().pass = pass
